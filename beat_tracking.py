@@ -2,6 +2,7 @@ import madmom
 import numpy as np
 import sys
 import subprocess
+import os
 
 def downbeat_tracking(audioPath):
     proc = madmom.features.DBNDownBeatTrackingProcessor(beats_per_bar=[
@@ -31,7 +32,17 @@ def write_beats(beats, OUTPUT_PATH = "beats.txt"):
         for i,v in enumerate(beats):
             f.write("{},{}\n".format(i,v))
 
+def create_folder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print ('Error: Creating directory. ' +  directory)
+
 if __name__ == '__main__':
+    
+
+    OUTPUT_PREFIX = "./output/"
 
     filename = sys.argv[1]
     filenamePieces = filename.split(".")
@@ -44,14 +55,17 @@ if __name__ == '__main__':
         print("[Info] Automatically convert .mp3 to .wav by ffmpeg")
         subprocess.run(["ffmpeg", "-i", "{}".format(filename), "{}.wav".format(filenamePieces[0])])
     
+    outputDir = "{}{}/".format(OUTPUT_PREFIX, filenamePieces[0])
+    create_folder(outputDir)
+
     print("Start beat_tracking....")
     beats = beat_tracking(filename)
-    write_beats(beats)
+    write_beats(beats, "{}/beats.txt".format(outputDir))
     print("Finish beat_tracking")
 
     print("Start downbeat_tracking")
     downbeats = downbeat_tracking(filename)
-    write_downbeats(downbeats)
+    write_downbeats(downbeats, "{}/downbeat.txt".format(outputDir))
     print("Finish downbeat_tracking")
 
 
