@@ -5,6 +5,7 @@ import sys
 import subprocess
 import os
 
+
 def downbeat_tracking(audioPath):
     proc = madmom.features.DBNDownBeatTrackingProcessor(beats_per_bar=[
         4, 4], fps=100)
@@ -19,41 +20,30 @@ def write_downbeats(beats, OUTPUT_PATH="downbeats.txt"):
         for i, v in enumerate(beats):
             f.write("{},{}\n".format(v[0], v[1]))
 
+
 def beat_tracking(fp):
     proc = madmom.features.beats.DBNBeatTrackingProcessor(fps=100)
-    act =  madmom.features.beats.RNNBeatProcessor()(fp)
+    act = madmom.features.beats.RNNBeatProcessor()(fp)
     # print(proc(act))
     beats = proc(act)
     return beats
 
-def write_beats(beats, OUTPUT_PATH = "beats.txt"):
+
+def write_beats(beats, OUTPUT_PATH="beats.txt"):
 
     with open(OUTPUT_PATH, 'w') as f:
-        for i,v in enumerate(beats):
-            f.write("{},{}\n".format(i,v))
+        for i, v in enumerate(beats):
+            f.write("{},{}\n".format(i, v))
+
 
 def create_folder(directory):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
     except OSError:
-        print ('Error: Creating directory. ' +  directory)
+        print('Error: Creating directory. ' + directory)
 
-def parse_args():
-    import argparse
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter, 
-        description=
-    """
-===================================================================
-Script for downbeat and beat tracking
-===================================================================
-    """)
-    parser.add_argument('-s', '--audio_path', type=str, help="absolute path of audio file")
-    parser.add_argument('-o', '--output_dir_path', type=str, help="absolute path of beats/downbeat output directory", default="./outputs/beat_tracking")
-    
-    return parser.parse_args()
-    
+
 def write_file(output_path, content=""):
     fp = Path(output_path)
     print()
@@ -68,40 +58,40 @@ def write_file(output_path, content=""):
 
     print('done')
 
+
 def track(args):
     audio_path = Path(args.audio_path)
-    if audio_path.suffix != '.wav' and  audio_path.suffix != '.mp3':
+    if audio_path.suffix != '.wav' and audio_path.suffix != '.mp3':
         print("unsupported audio type (only support mp3,wav)")
         exit()
 
-    if audio_path.suffix == '.mp3' or  audio_path.suffix == '.MP3':
+    if audio_path.suffix == '.mp3' or audio_path.suffix == '.MP3':
         print("[Info] Automatically convert .mp3 to .wav by ffmpeg")
-        subprocess.run(["ffmpeg", "-i", "{}/{}".format(audio_path.parent, audio_path.name), "{}.wav".format(audio_path.stem)])
+        subprocess.run(["ffmpeg", "-y", "-i", "{}/{}".format(audio_path.parent, audio_path.name),
+                        "{}/{}.wav".format(audio_path.parent, audio_path.stem)])
 
     audio_path = "{}/{}.wav".format(audio_path.parent, audio_path.stem)
 
     # beat
-    print("Start beat_tracking....")
+    print("[Info] Start beat_tracking....")
     beats = beat_tracking(audio_path)
     beats_string = ''
     for i, v in enumerate(beats):
-        beats_string += "{},{}\n".format(i,v)
+        beats_string += "{},{}\n".format(i, v)
     write_file("{}/beats.txt".format(args.output_dir_path), beats_string)
-    print("Finish beat_tracking")
+    print("[Info] Finish beat_tracking")
 
     # downbeat
-    print("Start downbeat_tracking")
+    print("[Info] Start downbeat_tracking")
     downbeats = downbeat_tracking(audio_path)
     downbeats_string = ''
-    for i, v  in enumerate(downbeats):
-        downbeats_string += "{},{}\n".format(i,v)
-    write_file("{}/downbeats.txt".format(args.output_dir_path), downbeats_string)
-    print("Finish downbeat_tracking")
+    for i, v in enumerate(downbeats):
+        downbeats_string += "{},{}\n".format(i, v)
+    write_file("{}/downbeats.txt".format(args.output_dir_path),
+               downbeats_string)
+    print("[Info] Finish downbeat_tracking")
 
 
-if __name__ == '__main__':
-    args = parse_args()
-    track(args)
-    
-    
-    
+class TrackerArgument:
+    def __init__(self):
+        pass

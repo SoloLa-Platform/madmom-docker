@@ -1,10 +1,31 @@
-# Madmom Beat/Downbeat tracking in Docker Environment
+# Beat tracking wrapper
+This is a simple wrapper library for beat and down-beat tracking algorithm. Currently, this package only has madmom downbeat tracker
+The input audio format should be .wav. But you can use ffmpeg to convert .mp3 to .wav
+## Requirement
+- [madmom](https://github.com/CPJKU/madmom)
+- [ffmpeg](https://ffmpeg.org/)
 
-## Requirements
-- [docker](https://www.docker.com/)
+# Usage
+## Command line 
+docker run -ti --rm -v $(pwd):/beat_tracker python cli.py input/test.mp3
 
-## Basic Usage
-docker run -ti --rm -v E:\workplace\projects\solola\madmom-docker:/madmom-docker/ madmom_beat_tracking:prod python beat_tracking.py -s /madmom-docker/input/slide.wav -o /madmom-docker/output/slide
 
-## Detail
-docker run -ti --rm -v E:\workplace\projects\solola\madmom-docker:/madmom-docker/ madmom_beat_tracking:prod python beat_tracking.py -h
+## Module
+```python
+import tracker
+
+args = tracker.TrackerArgument()
+args.audio_path = 'input/slide.mp3'
+args.output_dir_path = 'output/slide'
+tracker.track(args)
+```
+
+# Convert wav to mp3
+```shell
+ffmpeg -i input.wav -vn -ar 44100 -ac 2 -b:a 192k output.mp3
+```
+
+# Build docker image
+```shell
+docker build -t beat_tracker:dev -f dev.dockerfile .
+```
